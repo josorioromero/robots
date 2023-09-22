@@ -1,35 +1,98 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useState } from "react";
+import Robot from "./components/robot";
+import "./App.css";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { useFetchRobots, useAddRobot } from "./queries/index";
 
-function App() {
-  const [count, setCount] = useState(0)
+const queryClient = new QueryClient();
+
+const App: React.FC = () => {
+  const [robotName, setRobotName] = useState<string>("");
+  const [numberOfArms, setNumberOfArms] = useState<number>(2);
+  const [hasBattery, setHasBattery] = useState<boolean>(false);
+  const [robotType, setRobotType] = useState<string>("Basic");
+
+  const { data: robots = [] } = useFetchRobots();
+  const addRobotMutation = useAddRobot();
+
+  const addRobot = () => {
+    if (robotName.trim()) {
+      const newRobot = {
+        name: robotName,
+        numberOfArms,
+        hasBattery,
+        type: robotType,
+      };
+
+      addRobotMutation.mutate(newRobot);
+    }
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app-container">
+      <h1>Robot Manager</h1>
+      <div className="form-container">
+        <div className="input-group">
+          <label>Robot Name:</label>
+          <input
+            type="text"
+            placeholder="Robot name"
+            value={robotName}
+            onChange={(e) => setRobotName(e.target.value)}
+          />
+        </div>
+        <div className="input-group">
+          <label>Number of Arms:</label>
+          <input
+            type="number"
+            placeholder="Number of Arms"
+            value={numberOfArms}
+            onChange={(e) => setNumberOfArms(Number(e.target.value))}
+          />
+        </div>
+        <div className="input-group">
+          <label className="checkbox-label">
+            <input
+              type="checkbox"
+              checked={hasBattery}
+              onChange={() => setHasBattery(!hasBattery)}
+            />
+            Has Battery
+          </label>
+        </div>
+        <div className="input-group">
+          <label>Robot Type:</label>
+          <select
+            value={robotType}
+            onChange={(e) => setRobotType(e.target.value)}
+          >
+            <option value="Basic">Basic</option>
+            <option value="Advanced">Advanced</option>
+            <option value="Custom">Custom</option>
+          </select>
+        </div>
+        <button onClick={addRobot}>Add Robot</button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
+      <div className="list-container">
+        <h2>Robot List</h2>
+        <ul>
+          {robots.map((robot, index) => (
+            <Robot
+              key={index}
+              name={robot.name}
+              numberOfArms={robot.numberOfArms}
+              hasBattery={robot.hasBattery}
+              type={robot.type}
+            />
+          ))}
+        </ul>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default App
+export default () => (
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
+);

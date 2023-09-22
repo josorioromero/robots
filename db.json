@@ -1,0 +1,18 @@
+{
+  "robots": [
+    {
+      "name": "robotina",
+      "numberOfArms": 2,
+      "hasBattery": true,
+      "type": "Basic",
+      "id": 1
+    },
+    {
+      "name": "robot 2",
+      "numberOfArms": 3,
+      "hasBattery": true,
+      "type": "Custom",
+      "id": 2
+    }
+  ]
+}
